@@ -1,0 +1,135 @@
+-- compare total_ride to member_casual
+SELECT
+COUNT(ride_id) AS total_ride,
+SUM(CASE WHEN member_casual="member" THEN 1 ELSE 0 END) AS member_ride,
+SUM(CASE WHEN member_casual="casual" THEN 1 ELSE 0 END) AS casual_ride
+FROM 
+`cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`;
+
+-- compare day_week to  total_ride
+SELECT
+day_week,
+COUNT(ride_id) AS total_ride,
+SUM(CASE WHEN member_casual="member" THEN 1 ELSE 0 END) AS member_ride,
+SUM(CASE WHEN member_casual="casual" THEN 1 ELSE 0 END) AS casual_ride
+FROM 
+`cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+GROUP BY
+day_week;
+
+-- compare type_ride to total_ride 
+SELECT
+rideable_type,
+COUNT(ride_id) AS total_ride,
+SUM(CASE WHEN member_casual="member" THEN 1 ELSE 0 END) AS member_ride,
+SUM(CASE WHEN member_casual="casual" THEN 1 ELSE 0 END) AS casual_ride
+FROM 
+`cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+GROUP BY
+rideable_type;
+
+-- compare total_ride based on started_hour trend 
+SELECT
+started_hour,
+COUNT(ride_id) AS total_ride,
+SUM(CASE WHEN member_casual="member" THEN 1 ELSE 0 END) AS member_ride,
+SUM(CASE WHEN member_casual="casual" THEN 1 ELSE 0 END) AS casual_ride
+FROM 
+`cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+GROUP BY
+started_hour
+ORDER BY
+started_hour;
+
+-- to know what are the top 5 start_station_name based on casual_ride
+SELECT
+start_station_name,
+COUNT(ride_id) AS total_ride,
+SUM(CASE WHEN member_casual="casual" THEN 1 ELSE 0 END) AS casual_ride
+FROM 
+`cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+WHERE
+start_station_name IS NOT NULL
+GROUP BY
+start_station_name
+ORDER BY
+casual_ride DESC
+LIMIT 5;
+
+-- to know what are the top 5 start_station_name based on member_ride
+SELECT
+start_station_name,
+COUNT(ride_id) AS total_ride,
+SUM(CASE WHEN member_casual="member" THEN 1 ELSE 0 END) AS member_ride
+FROM 
+`cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+WHERE
+start_station_name IS NOT NULL
+GROUP BY
+start_station_name
+ORDER BY
+member_ride DESC
+LIMIT 5;
+
+-- to know the mode of started_hour based on start_station_name (casual_TOP 5)
+SELECT
+start_station_name,
+started_hour AS mode_started_hour,
+member_casual
+FROM(
+  SELECT
+  DISTINCT start_station_name,
+  started_hour,
+  member_casual,
+  ROW_NUMBER () OVER (PARTITION BY start_station_name ORDER BY COUNT(started_hour) DESC) rn
+  FROM 
+  `cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+  WHERE
+  start_station_name= "Streeter Dr & Grand Ave"
+  OR start_station_name= "DuSable Lake Shore Dr & Monroe St"
+OR start_station_name= "Millennium Park"
+OR start_station_name= "Michigan Ave & Oak St"
+OR start_station_name= "DuSable Lake Shore Dr & North Blvd"
+AND member_casual="casual"
+GROUP BY
+  start_station_name, started_hour, member_casual)
+WHERE
+rn=1; 
+
+-- to know the mode of started_hour based on start_station_name (member_TOP 5)
+SELECT
+start_station_name,
+started_hour AS mode_started_hour,
+member_casual
+FROM(
+  SELECT
+  DISTINCT start_station_name,
+  started_hour,
+  member_casual,
+  ROW_NUMBER () OVER (PARTITION BY start_station_name ORDER BY COUNT(started_hour) DESC) rn
+  FROM 
+  `cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+  WHERE
+  start_station_name= "Kingsbury St & Kinzie St"
+  OR start_station_name= "Clark St & Elm St"
+OR start_station_name= "Wells St & Concord Ln"
+OR start_station_name= "University Ave & 57th St"
+OR start_station_name= "Clinton St & Washington Blvd"
+AND member_casual="member"
+GROUP BY
+  start_station_name, started_hour, member_casual)
+WHERE
+rn=1; 
+
+-- to know the trend of total_ride trend throughout year
+SELECT
+started_date,
+COUNT(ride_id) AS total_ride,
+SUM(CASE WHEN member_casual="member" THEN 1 ELSE 0 END) AS member_ride,
+SUM(CASE WHEN member_casual="casual" THEN 1 ELSE 0 END) AS casual_ride
+FROM
+`cyclistic-data-376114.Cyclistic_data.Cyclistic Data 2022`
+GROUP BY
+started_date
+ORDER BY
+started_date;
